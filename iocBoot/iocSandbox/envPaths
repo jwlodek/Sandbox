@@ -1,0 +1,3 @@
+epicsEnvSet("IOC","iocSandbox")
+epicsEnvSet("TOP","/epics/modules/Sandbox")
+epicsEnvSet("EPICS_BASE","/usr/lib/epics")
