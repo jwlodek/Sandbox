@@ -1,0 +1,5 @@
+record(calc, "$(P)$(R)Clock"){
+    field(CALC, "VAL = 1 ? 0 : 1")
+    field(SCAN, "$(SCAN_RATE)")
+}
+
