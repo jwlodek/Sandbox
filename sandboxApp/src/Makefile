@@ -18,7 +18,7 @@ $(PROD_IOC)_DBD += asyn.dbd asynRecord.dbd
 $(PROD_IOC)_DBD += drvAsynIPPort.dbd
 $(PROD_IOC)_DBD += calc.dbd calcSupport.dbd
 $(PROD_IOC)_DBD += stream.dbd
-$(PROD_IOC)_DBD += iocAdmin.dbd busyRecord.dbd busySupport.dbd
+$(PROD_IOC)_DBD += iocAdmin.dbd busyRecord.dbd busySupport.dbd asSupport.dbd
 
 # <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
 $(PROD_IOC)_SRCS_DEFAULT += $(PROD_IOC)_registerRecordDeviceDriver.cpp $(PROD_IOC)Main.cpp
