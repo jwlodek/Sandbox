@@ -1,4 +1,3 @@
-x
 record(stringin, "$(P)$(R)IDN") {
     field(DESC, "Device Description")
     field(DTYP, "asynOctet")

@@ -99,7 +99,7 @@ TSCSD::TSCSD(const char* portName, const char* deviceIPPort, int numChannels)
     setStringParam(TSCSD_idn, idn);
 
     char nchans[16];
-    this->writeReadCmd("NCHANS?", nchans, 16, TIMEOUT);
+    this->writeReadCmd("NCHAN?", nchans, 16, TIMEOUT);
     setIntegerParam(TSCSD_nchans, atoi(nchans));
 
     for(int i = 0; i < numChannels; i++) {
@@ -149,7 +149,7 @@ void TSCSDChannel::monitorThread(){
         setDoubleParam(CHAN_pos, atof(positionReadback));
         setIntegerParam(CHAN_atsp, atoi(isAtRest));
 
-        epicsThreadSleep(1);
+        epicsThreadSleep(0.1);
     }
 }
 
