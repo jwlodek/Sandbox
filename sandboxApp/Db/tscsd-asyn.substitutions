@@ -1,0 +1,14 @@
+file "$(SANDBOX)/db/tscsd-device-asyn.template"
+{
+pattern { P,     R,       PORT}
+        {"DEV:", "SB1:", "DEV"}
+}
+
+file "$(SANDBOX)/db/tscsd-chan-asyn.template
+{
+pattern { P,     R,           PORT,  CHAN}
+        {"DEV:", "SB1:", "DEV_CHAN1", "1"}
+        {"DEV:", "SB1:", "DEV_CHAN2", "2"}
+        {"DEV:", "SB1:", "DEV_CHAN3", "3"}
+        {"DEV:", "SB1:", "DEV_CHAN4", "4"}
+}

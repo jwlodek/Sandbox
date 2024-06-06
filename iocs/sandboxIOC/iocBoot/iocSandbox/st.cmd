@@ -24,11 +24,15 @@ drvAsynIPPortConfigure("$(PORT)", "10.69.58.50:8888")
 asynOctetSetOutputEos("$(PORT)", 0, "\n")
 asynOctetSetOutputEos("$(PORT)", 0, "\n")
 
+TSCSDConfig("DEV", "$(PORT)", 4)
+
 # Load any additional specified databases.
 dbLoadRecords("$(EPICS_BASE)/db/asynRecord.db", "PORT=$(PORT), P=$(PREFIX), R=Asyn, ADDR=0, OMAX=0, IMAX=0")
 
 ## Load record instances
-dbLoadTemplate("../../db/tscsd.substitutions")
+#dbLoadTemplate("$(SANDBOX)/db/tscsd.substitutions")
+dbLoadTemplate("$(SANDBOX)/db/tscsd-asyn.substitutions")
+
 
 iocInit()
 

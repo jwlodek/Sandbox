@@ -13,7 +13,10 @@ include $(TOP)/configure/CONFIG
 DB += clock.template
 DB += tscsd-device-stream.template
 DB += tscsd-chan-stream.template
+DB += tscsd-device-asyn.template
+DB += tscsd-chan-asyn.template
 DB += tscsd.substitutions
+DB += tscsd-asyn.substitutions
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
