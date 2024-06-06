@@ -1,4 +1,0 @@
-epicsEnvSet("IOC","iocSandbox")
-epicsEnvSet("TOP","../..")
-epicsEnvSet("SANDBOX","../..")
-epicsEnvSet("EPICS_BASE","/usr/lib/epics")

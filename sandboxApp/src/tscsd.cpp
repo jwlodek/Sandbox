@@ -13,6 +13,7 @@
 #include <epicsTime.h>
 #include <iocsh.h>
 
+#include <asynOctetSyncIO.h>
 
 #include "tscsd.h"
 
@@ -49,8 +50,8 @@
  * This is the function that initializes the driver, and is called in the IOC startup script
  *
  */
-extern "C" int TSCSDConfig(const char* portName, const char* devicePortName, int numChannels) {
-    new TSCSD(portName, devicePortName, numChannels);
+extern "C" int TSCSDConfig(const char* portName, const char* deviceIPPort, int numChannels) {
+    new TSCSD(portName, deviceIPPort, numChannels);
     return (asynSuccess);
 }
 
@@ -59,17 +60,68 @@ static void exitCallbackC(void* pPvt) {
     delete pTSCSD;
 }
 
+asynStatus TSCSD::writeReadCmd(const char* cmd, char* ret, size_t maxChars, double timeout){
 
-TSCSD::TSCSD(const char* portName, const char* devicePortName, int numChannels) {
+    size_t nwrite, nread;
+    asynStatus status;
+    int eomReason;
+    const char *functionName="writeReadCmd";
+    pasynOctetSyncIO->flush(this->pasynUserDeviceIP);
+    status = pasynOctetSyncIO->writeRead(this->pasynUserDeviceIP, cmd,
+                                      strlen(cmd), ret, maxChars, timeout,
+                                      &nwrite, &nread, &eomReason);
+    return status;
+}
+
+
+TSCSD::TSCSD(const char* portName, const char* deviceIPPort, int numChannels)
+    : asynPortDriver(
+          portName, 1, /* maxAddr */
+          (int)NUM_TSCSD_PARAMS,
+          asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynDrvUserMask |
+              asynOctetMask, /* Interface mask */
+          asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask |
+              asynOctetMask, /* Interrupt mask */
+          0, /* asynFlags.  This driver does not block and it is not multi-device, so flag is 0 */
+          1, /* Autoconnect */
+          0, /* Default priority */
+          0) /* Default stack size*/
+
+{
     const char* functionName = "TSCSD";
     createParam(TSCSDIDNSTR, asynParamOctet, &TSCSD_idn);
     createParam(TSCSDNCHANSSTR, asynParamInt32, &TSCSD_nchans);
 
-    channels.
+    pasynOctetSyncIO->connect(deviceIPPort, 0, &this->pasynUserDeviceIP, NULL);
+
+    char idn[48];
+    this->writeReadCmd("*IDN?", idn, 48, TIMEOUT);
+    setStringParam(TSCSD_idn, idn);
+
+    char nchans[16];
+    this->writeReadCmd("NCHANS?", nchans, 16, TIMEOUT);
+    setIntegerParam(TSCSD_nchans, atoi(nchans));
+
+    for(int i = 0; i < numChannels; i++) {
+        char chanPortStr[32];
+        snprintf(chanPortStr, 32, "%s_CHAN%d", portName, i + 1);
+        TSCSDChannel* channel = new TSCSDChannel(this, chanPortStr, i + 1);
+        channels.push_back(channel);
+    }
 
     epicsAtExit(exitCallbackC, (void*) this);
 
 }
+
+TSCSD::~TSCSD(){
+    const char* functionName = "~TSCSD";
+    LOG("Shutting down simple device IOC...");
+    for(int i = 0; i< this->channels.size(); i++){
+        delete (TSCSDChannel*) this->channels[i];
+    }
+    LOG("Done");
+}
+
 
 void chanMonitorThreadC(void* chanPtr) {
     TSCSDChannel* pChan = (TSCSDChannel*) chanPtr;
@@ -77,22 +129,97 @@ void chanMonitorThreadC(void* chanPtr) {
 }
 
 void TSCSDChannel::monitorThread(){
-    while(alive) {
+    while(this->alive) {
+
+        char rampRate[48], positionReadback[48], isAtRest[16];
+        char rampRateCmd[16], positionReadbackCmd[16], isAtRestCmd[16];
+
+        snprintf(rampRateCmd, 16, "RR? %d", this->chanNum);
+        snprintf(positionReadbackCmd, 16, "READ? %d", this->chanNum);
+        snprintf(isAtRestCmd, 16, "ATSP? %d", this->chanNum);
 
         // Send command to low level port here
+        this->parent->writeReadCmd(rampRateCmd, rampRate, 48, TIMEOUT);
+        this->parent->writeReadCmd(positionReadbackCmd, positionReadback, 48, TIMEOUT);
+        this->parent->writeReadCmd(isAtRestCmd, isAtRest, 48, TIMEOUT);
+
+        // Ramp rate command returns RR followed by CHAN# followed by = follwed by RR
+        setDoubleParam(CHAN_rr, atof(strtok(rampRate, "=")));
+
+        setDoubleParam(CHAN_pos, atof(positionReadback));
+        setIntegerParam(CHAN_atsp, atoi(isAtRest));
+
         epicsThreadSleep(1);
     }
 }
 
-TSCSDChannel::TSCSDChannel(TSCSD parentDevice, const char* portName, const char* deviceIPPort, int chanNum) {
+
+asynStatus TSCSDChannel::writeFloat64(asynUser* pasynUser, epicsFloat64 value){
+    int function = pasynUser->reason;
+    asynStatus status = asynSuccess;
+    static const char* functionName = "writeFloat64";
+    if (function == CHAN_pos){
+        char positionSetCmd[48], positionRB[48];
+        snprintf(positionSetCmd, 48, "SP %d %f", this->chanNum, value);
+        status = this->parent->writeReadCmd(positionSetCmd, positionRB, 48, TIMEOUT);
+    } else if (function == CHAN_rr) {
+        char positionSetCmd[48], positionRB[48];
+        snprintf(positionSetCmd, 48, "SP %d %f", this->chanNum, value);
+        status = this->parent->writeReadCmd(positionSetCmd, positionRB, 48, TIMEOUT);
+    }
+    
+    if (status) {
+        ERR_ARGS("ERROR status=%d, function=%d, value=%f, msg=%s", status, function, value);
+    } else {
+        status = setDoubleParam(function, value);
+        LOG_ARGS("function=%d value=%f", function, value);
+    }
+
+    callParamCallbacks();
+    return status;
+}
+
+TSCSDChannel::TSCSDChannel(TSCSD* parentDevice, const char* portName, int chanNum) 
+    : asynPortDriver(
+          portName, 1, /* maxAddr */
+          (int)NUM_CHAN_PARAMS,
+          asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask | asynDrvUserMask |
+              asynOctetMask, /* Interface mask */
+          asynInt32Mask | asynFloat64Mask | asynFloat64ArrayMask |
+              asynOctetMask, /* Interrupt mask */
+          0, /* asynFlags.  This driver does not block and it is not multi-device, so flag is 0 */
+          1, /* Autoconnect */
+          0, /* Default priority */
+          0) /* Default stack size*/
+{
     const char* functionName = "TSCSDChannel";
     createParam(CHANPOSSTR, asynParamFloat64, &CHAN_pos);
     createParam(CHANRRSTR, asynParamFloat64, &CHAN_rr);
     createParam(CHANATSPSTR, asynParamInt32, &CHAN_atsp);
+    this->parent = parentDevice;
+    this->chanNum = chanNum;
 
-    epicsThreadCreateOpt()
+    LOG_ARGS("Initializing channel %d", chanNum);
+
+    // Create our thread options struct
+    epicsThreadOpts opts;
+    opts.priority = epicsThreadPriorityMedium;
+    opts.stackSize = epicsThreadGetStackSize(epicsThreadStackMedium);
+    opts.joinable = 1;
+
+    char chanThreadName[48];
+    snprintf(chanThreadName, 48, "CHAN%d_MON_THREAD", chanNum);
+
+    epicsThreadCreateOpt(chanThreadName, (EPICSTHREADFUNC) chanMonitorThreadC, this, &opts);
 }
 
+
+TSCSDChannel::~TSCSDChannel(){
+    const char* functionName = "~TSCSDChannel";
+    this->alive = false;
+    epicsThreadMustJoin(this->monitorThreadId);
+    LOG_ARGS("Shut down channel %d", this->chanNum);
+}
 
 
 //-------------------------------------------------------------

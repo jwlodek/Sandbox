@@ -7,7 +7,7 @@ DIRS += configure
 DIRS += $(wildcard *Sup)
 DIRS += $(wildcard *App)
 DIRS += $(wildcard *Top)
-DIRS += $(wildcard iocs)
+DIRS += $(wildcard iocBoot)
 
 # The build order is controlled by these dependency rules:
 
@@ -24,7 +24,7 @@ $(foreach dir, $(filter %Top, $(DIRS)), \
     $(eval $(dir)_DEPEND_DIRS += $(filter %Sup %App, $(DIRS))))
 
 # iocBoot depends on all *App dirs
-iocs_DEPEND_DIRS += $(filter %App,$(DIRS))
+iocBoot_DEPEND_DIRS += $(filter %App,$(DIRS))
 
 # Add any additional dependency rules here:
 

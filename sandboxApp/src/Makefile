@@ -1,34 +1,27 @@
 TOP=../..
-
 include $(TOP)/configure/CONFIG
 #----------------------------------------
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
-#=============================
+#
+#  #======== DETECTOR LIBRARY ==============
 
-#=============================
-# build an ioc application for testing
+USR_CXXFLAGS_Linux += -D_LINUX -D_x86 -std=c++98
+USR_CFLAGS_Linux += -std=gnu99
 
-PROD_IOC = sandbox
-DBD += $(PROD_IOC).dbd
-PROTO += tscsd.proto
+# The following is needed on win32-x86-debug because the Prosilica library 
+# wants to use LIBCMT, and that conflicts with LIBCMTD
+
+LIBRARY_IOC += tscsd
+
+INC += tscsd.h
+
+LIB_SRCS += tscsd.cpp
 
 
-# $(PROD_IOC).dbd will be made up from these files:
-$(PROD_IOC)_DBD += base.dbd
-$(PROD_IOC)_DBD += asyn.dbd asynRecord.dbd
-$(PROD_IOC)_DBD += drvAsynIPPort.dbd
-$(PROD_IOC)_DBD += calc.dbd calcSupport.dbd
-$(PROD_IOC)_DBD += stream.dbd
-$(PROD_IOC)_DBD += iocAdmin.dbd busyRecord.dbd busySupport.dbd asSupport.dbd
+DBD += tscsd.dbd
 
-# <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
-$(PROD_IOC)_SRCS_DEFAULT += $(PROD_IOC)_registerRecordDeviceDriver.cpp $(PROD_IOC)Main.cpp
 
-$(PROD_IOC)_LIBS += asyn calc stream autosave devIocStats busy
-$(PROD_IOC)_LIBS += seq pv
-$(PROD_IOC)_LIBS += $(EPICS_BASE_IOC_LIBS)
-
-#===========================
+# #=============================
 
 include $(TOP)/configure/RULES
 #----------------------------------------

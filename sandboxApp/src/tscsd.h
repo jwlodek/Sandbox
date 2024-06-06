@@ -31,31 +31,33 @@ static const char* driverName = "TSCSD";
 #define CHANRRSTR "RR"
 #define CHANATSPSTR "ATSP"
 
+#define TIMEOUT 5
 
 class TSCSD : public asynPortDriver
 {
 public:
     TSCSD(const char* portName, const char* deviceIPPort, int numChans);
     ~TSCSD();
+    asynStatus writeReadCmd(const char* cmd, char* ret, size_t maxChars, double timeout);
 protected:
     int TSCSD_idn;
     int TSCSD_nchans;
 private:
-    vector<TSCSDChannel> channels;
-# define NUM_TSCSD_PARAM
+    std::vector<void*> channels;
+    asynUser* pasynUserDeviceIP;
+# define NUM_TSCSD_PARAMS 2
 
-}
+};
 
 
 class TSCSDChannel : public asynPortDriver
 {
 public:
 
-    TSCSDChannel(TSCSD parentDevice, const char* portName, const char* deviceIPPort, int chanNum);
+    TSCSDChannel(TSCSD* parentDevice, const char* portName, int chanNum);
     ~TSCSDChannel();
     void monitorThread();
 
-    virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
     virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
 
 protected:
@@ -64,4 +66,10 @@ protected:
     int CHAN_atsp;
 private:
     bool alive = true;
-}
+    int chanNum;
+    TSCSD* parent;
+    epicsThreadId monitorThreadId;
+#define NUM_CHAN_PARAMS 3
+};
+
+#endif;

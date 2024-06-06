@@ -1,15 +1,41 @@
-record(stringin, "$(P)$(R)IDN") {
-    field(DESC, "Device Description")
-    field(DTYP, "stream")
-    field(INP,  "@tscsd.proto getDeviceInfo $(PORT)")
-    field(PINI, "YES")
-    field(SCAN, "Passive")
+
+record(ao, "$(P)$(R)$(CHAN):RR:SET") {
+    field(DESC, "Set ramp rate")
+    field(PREC, "3")
+    field(EGU,  "Units")
+    field(DTYP, "asynFloat64")
+    field(OUT, "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))RR")
 }
 
-record(ai, "$(P)$(R)NCHANS"){
+record(ai, "$(P)$(R)$(CHAN):RR") {
+    field(DESC, "Ramp Rate")
     field(DTYP, "stream")
-    field(INP, "@tscsd.proto getNumChannels $(PORT)")
-    field(PINI, "YES")
-    field(EGU, "channels")
-    field(SCAN, "Passive")
+    field(SCAN, "1 second")
+    field(PREC, "3")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))RR")
 }
+
+record(ao, "$(P)$(R)$(CHAN):SP:SET") {
+    field(DESC, "Set target set point")
+    field(PREC, "3")
+    field(EGU,  "Units")
+    field(DTYP, "stream")
+    field(OUT, "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))POS")
+}
+
+record(ai, "$(P)$(R)$(CHAN):RB") {
+    field(DESC, "Value")
+    field(DTYP, "asynFloat64")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))POS")
+}
+
+record(bi, "$(P)$(R)$(CHAN):ATSP") {
+    field(DESC, "Value")
+    field(DTYP, "asynInt32")
+    field(ZNAM, "Moving")
+    field(ONAM, "At Setpoint")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ATSP")
+}
+
