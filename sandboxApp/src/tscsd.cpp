@@ -144,7 +144,9 @@ void TSCSDChannel::monitorThread(){
         this->parent->writeReadCmd(isAtRestCmd, isAtRest, 48, TIMEOUT);
 
         // Ramp rate command returns RR followed by CHAN# followed by = follwed by RR
-        setDoubleParam(CHAN_rr, atof(strtok(rampRate, "=")));
+        char* token = strtok(rampRate, "=");
+        strtok(NULL, "=");
+        setDoubleParam(CHAN_rr, atof(token));
 
         setDoubleParam(CHAN_pos, atof(positionReadback));
         setIntegerParam(CHAN_atsp, atoi(isAtRest));
