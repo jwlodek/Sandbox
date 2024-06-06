@@ -1,0 +1,14 @@
+file "$(SANDBOX)/db/tscsd-device-stream.template"
+{
+pattern { P,     R,       PORT}
+        {"DEV:", "SB1:", "SB1"}
+}
+
+file "$(SANDBOX)/db/tscsd-chan-stream.template"
+{
+pattern { P,     R,     PORT,  CHAN}
+        {"DEV:", "SB1:", "SB1", "1"}
+        {"DEV:", "SB1:", "SB1", "2"}
+        {"DEV:", "SB1:", "SB1", "3"}
+        {"DEV:", "SB1:", "SB1", "4"}
+}

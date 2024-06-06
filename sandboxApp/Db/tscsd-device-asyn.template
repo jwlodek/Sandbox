@@ -1,0 +1,18 @@
+x
+
+
+record(stringin, "$(P)$(R)IDN") {
+    field(DESC, "Device Description")
+    field(DTYP, "asynOctet")
+    field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))IDN")
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+}
+
+record(ai, "$(P)$(R)NCHANS"){
+    field(DTYP, "asynInt32")
+    field(INP, "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))NCHANS")
+    field(PINI, "YES")
+    field(EGU, "channels")
+    field(SCAN, "Passive")
+}

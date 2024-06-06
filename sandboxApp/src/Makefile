@@ -10,6 +10,7 @@ include $(TOP)/configure/CONFIG
 
 PROD_IOC = sandbox
 DBD += $(PROD_IOC).dbd
+PROTO += tscsd.proto
 
 
 # $(PROD_IOC).dbd will be made up from these files:
