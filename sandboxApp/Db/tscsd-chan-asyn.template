@@ -36,6 +36,7 @@ record(bi, "$(P)$(R)$(CHAN):ATSP") {
     field(DTYP, "asynInt32")
     field(ZNAM, "Moving")
     field(ONAM, "At Setpoint")
+    field(VAL, "1")
     field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))ATSP")
 }
 

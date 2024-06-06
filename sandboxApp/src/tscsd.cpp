@@ -164,14 +164,13 @@ asynStatus TSCSDChannel::writeFloat64(asynUser* pasynUser, epicsFloat64 value){
         status = this->parent->writeReadCmd(positionSetCmd, positionRB, 48, TIMEOUT);
     } else if (function == CHAN_rr) {
         char positionSetCmd[48], positionRB[48];
-        snprintf(positionSetCmd, 48, "SP %d %f", this->chanNum, value);
+        snprintf(positionSetCmd, 48, "RR %d %f", this->chanNum, value);
         status = this->parent->writeReadCmd(positionSetCmd, positionRB, 48, TIMEOUT);
     }
     
     if (status) {
         ERR_ARGS("ERROR status=%d, function=%d, value=%f, msg=%s", status, function, value);
     } else {
-        status = setDoubleParam(function, value);
         LOG_ARGS("function=%d value=%f", function, value);
     }
 
