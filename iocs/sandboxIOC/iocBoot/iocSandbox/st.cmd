@@ -22,7 +22,7 @@ sandbox_registerRecordDeviceDriver(pdbbase)
 
 drvAsynIPPortConfigure("$(PORT)", "10.69.58.50:8888")
 asynOctetSetOutputEos("$(PORT)", 0, "\n")
-asynOctetSetOutputEos("$(PORT)", 0, "\n")
+asynOctetSetInputEos("$(PORT)", 0, "\n")
 
 TSCSDConfig("DEV", "$(PORT)", 4)
 
@@ -31,8 +31,9 @@ dbLoadRecords("$(EPICS_BASE)/db/asynRecord.db", "PORT=$(PORT), P=$(PREFIX), R=As
 
 ## Load record instances
 #dbLoadTemplate("$(SANDBOX)/db/tscsd.substitutions")
-dbLoadTemplate("$(SANDBOX)/db/tscsd-asyn.substitutions")
-
+#dbLoadTemplate("$(SANDBOX)/db/tscsd-asyn.substitutions")
+dbLoadRecords("$(SANDBOX)/db/tscsd-device-asyn.template", "PORT=DEV, P=$(P), R=$(R)")
+dbLoadRecords("$(SANDBOX)/db/tscsd-chan-asyn.template", "PORT=DEV_CHAN1, P=$(P), R=$(R), CHAN=1")
 
 iocInit()
 

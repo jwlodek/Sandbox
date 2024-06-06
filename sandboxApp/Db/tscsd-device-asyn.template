@@ -1,6 +1,6 @@
 record(stringin, "$(P)$(R)IDN") {
     field(DESC, "Device Description")
-    field(DTYP, "asynOctet")
+    field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))IDN")
     field(PINI, "YES")
     field(SCAN, "Passive")

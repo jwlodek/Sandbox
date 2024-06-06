@@ -4,7 +4,7 @@ pattern { P,     R,       PORT}
         {"DEV:", "SB1:", "DEV"}
 }
 
-file "$(SANDBOX)/db/tscsd-chan-asyn.template
+file "$(SANDBOX)/db/tscsd-chan-asyn.template"
 {
 pattern { P,     R,           PORT,  CHAN}
         {"DEV:", "SB1:", "DEV_CHAN1", "1"}

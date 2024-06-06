@@ -9,7 +9,7 @@ record(ao, "$(P)$(R)$(CHAN):RR:SET") {
 
 record(ai, "$(P)$(R)$(CHAN):RR") {
     field(DESC, "Ramp Rate")
-    field(DTYP, "stream")
+    field(DTYP, "asynFloat64")
     field(SCAN, "1 second")
     field(PREC, "3")
     field(INP,  "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))RR")
@@ -19,7 +19,7 @@ record(ao, "$(P)$(R)$(CHAN):SP:SET") {
     field(DESC, "Set target set point")
     field(PREC, "3")
     field(EGU,  "Units")
-    field(DTYP, "stream")
+    field(DTYP, "asynFloat64")
     field(OUT, "@asyn($(PORT),$(ADDR=0),$(TIMEOUT=1))POS")
 }
 
