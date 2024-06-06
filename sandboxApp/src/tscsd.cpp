@@ -148,6 +148,7 @@ void TSCSDChannel::monitorThread(){
 
         setDoubleParam(CHAN_pos, atof(positionReadback));
         setIntegerParam(CHAN_atsp, atoi(isAtRest));
+        callParamCallbacks();
 
         epicsThreadSleep(0.1);
     }
